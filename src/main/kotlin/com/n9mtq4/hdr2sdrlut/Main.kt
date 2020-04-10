@@ -34,6 +34,13 @@ val Y_RANDOM_RANGE = 0 until Y_SELECTION
 
 fun main() {
 	
+	generatePyImageMap()
+//	generateCSV()
+	
+}
+
+fun getFileMap(): List<Pair<File, File>> {
+	
 	val hdrFiles = File(HDR_FRAMES_DIR).listFiles()!!.sorted().subList(HDR_START - 1, HDR_END)
 	val sdrFiles = File(SDR_FRAMES_DIR).listFiles()!!.sorted().subList(SDR_START - 1, SDR_END)
 	
@@ -42,6 +49,14 @@ fun main() {
 	val fileMap = sdrFiles
 		.zip(hdrFiles)
 		.filterIndexed { i, _ -> i % FRAME_SELECTION == 0 }
+	
+	return fileMap
+	
+}
+
+fun generateCSV() {
+	
+	val fileMap = getFileMap()
 	
 	val data = fileMap
 		.shuffled()
@@ -73,6 +88,25 @@ fun main() {
 	}
 	
 	outputWriters.forEach(BufferedWriter::close)
+	
+}
+
+fun generatePyImageMap() {
+	
+	val fileMap = getFileMap()
+	
+	val outputFile = File("pyfilemap.txt")
+	val outputWriter = outputFile.bufferedWriter()
+	
+	fileMap.map { (s, h) -> s.absolutePath to h.absolutePath }
+		.forEach { (sdrFile, hdrFile) ->
+		outputWriter.write(hdrFile)
+		outputWriter.newLine()
+		outputWriter.write(sdrFile)
+		outputWriter.newLine()
+	}
+	
+	outputWriter.close()
 	
 }
 

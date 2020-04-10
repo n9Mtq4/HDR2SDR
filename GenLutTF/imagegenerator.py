@@ -2,6 +2,7 @@ from typing import Tuple
 
 import OpenImageIO as oiio
 
+import numpy as np
 from tensorflow.keras.utils import Sequence
 
 
@@ -72,6 +73,10 @@ class HDR2SDRImageGenerator(Sequence):
         x_end, y_end = (width - right, height - bottom)
         self._hdr_buffer = self._hdr_buffer[top:y_end, left:x_end].reshape((self.__calc_pixels_per_image(), 3))
         self._sdr_buffer = self._sdr_buffer[top:y_end, left:x_end].reshape((self.__calc_pixels_per_image(), 3))
+        
+        # shuffle the buffer
+        np.random.shuffle(self._hdr_buffer)
+        np.random.shuffle(self._sdr_buffer)
     
     def __getitem__(self, index):
         """

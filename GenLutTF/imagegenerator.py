@@ -2,19 +2,10 @@ from typing import Tuple
 
 import OpenImageIO as oiio
 
-import keras.utils
-
-IMAGE_FILE = "/mnt/L4/media/clonewars/Season07/hdrluts/1080hdr/output_00074.png"
-
-def itest():
-    
-    img_input = oiio.ImageInput.open(IMAGE_FILE)
-    pix = img_input.read_image(format='uint16')
-    print(img_input)
-    print(pix)
+from tensorflow.keras.utils import Sequence
 
 
-class HDR2SDRImageGenerator(keras.utils.Sequence):
+class HDR2SDRImageGenerator(Sequence):
     """
     A keras Sequence that generates data to train a model to create a LUT to convert HDR to SDR
     """
@@ -34,7 +25,7 @@ class HDR2SDRImageGenerator(keras.utils.Sequence):
         
         self._pixels_per_image = self.__calc_pixels_per_image()
         assert self._pixels_per_image % batch_size == 0
-        self._batches_per_image = self._pixels_per_image / batch_size
+        self._batches_per_image = self._pixels_per_image // batch_size
         
         self._hdr_buffer = None
         self._sdr_buffer = None
@@ -72,7 +63,7 @@ class HDR2SDRImageGenerator(keras.utils.Sequence):
         # load the buffers
         hdr_img = oiio.ImageInput.open(hdr_filepath)
         self._hdr_buffer = hdr_img.read_image(format='uint16')
-        sdr_img = oiio.ImageInput.open(hdr_filepath)
+        sdr_img = oiio.ImageInput.open(sdr_filepath)
         self._sdr_buffer = sdr_img.read_image(format='uint8')
         
         # crop
@@ -102,8 +93,3 @@ class HDR2SDRImageGenerator(keras.utils.Sequence):
         """
         return len(self._image_map) * self._batches_per_image
 
-
-# .getpixel((10, 150))
-
-if __name__ == '__main__':
-    itest()

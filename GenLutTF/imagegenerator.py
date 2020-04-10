@@ -67,6 +67,9 @@ class HDR2SDRImageGenerator(Sequence):
         sdr_img = oiio.ImageInput.open(sdr_filepath)
         self._sdr_buffer = sdr_img.read_image(format='uint8')
         
+        hdr_img.close()
+        sdr_img.close()
+        
         # crop
         left, right, top, bottom = self._crop
         width, height = self._image_size

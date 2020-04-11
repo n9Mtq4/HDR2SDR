@@ -32,6 +32,8 @@ class HDR2SDRImageGenerator(Sequence):
         
         self._hdr_buffer = np.zeros((self.__get_pixel_buffer_size(), 3))
         self._sdr_buffer = np.zeros((self.__get_pixel_buffer_size(), 3))
+        
+        self._current_buffer_range = None
     
     def __cropped_image_size(self) -> Tuple[int, int]:
         """
@@ -70,6 +72,7 @@ class HDR2SDRImageGenerator(Sequence):
         
         image_start_index = index // self._batches_per_image
         image_end_index = min(image_start_index + self._buffer_size, len(self._image_map) - 1)  # range cap
+        self._current_buffer_range = range(image_start_index, image_end_index)
         for image_index in range(image_start_index, image_end_index):
             
             hdr_filepath, sdr_filepath = self._image_map[image_index]
@@ -103,6 +106,11 @@ class HDR2SDRImageGenerator(Sequence):
         buffer_index = index % (self._batches_per_image * self._buffer_size)
         pixel_start = self._batch_size * buffer_index
         pixel_end = pixel_start + self._batch_size
+        
+        # by default model.fit shuffles, so getitem isn't sequential numbers, messes up buffering. this detects that
+        request_image = index // self._batches_per_image
+        if request_image not in self._current_buffer_range:
+            print(f"WARNING: IMAGE {request_image} IS NOT CURRENTLY IN THE BUFFER: {self._current_buffer_range}")
         
         return self._hdr_buffer[pixel_start:pixel_end], self._sdr_buffer[pixel_start:pixel_end]
     

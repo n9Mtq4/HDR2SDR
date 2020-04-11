@@ -34,8 +34,8 @@ val Y_RANDOM_RANGE = 0 until Y_SELECTION
 
 fun main() {
 	
-	generatePyImageMap()
-//	generateCSV()
+//	generatePyImageMap()
+	generateCSV()
 	
 }
 
@@ -69,6 +69,7 @@ fun generateCSV() {
 	
 	val outputFiles = Array(CSV_SPLITS) { i -> File("s07e05_${i + 1}.csv") }
 	val outputWriters = outputFiles.map { it.bufferedWriter() }
+	val lineCounters = Array(CSV_SPLITS) { 0L }
 	
 	outputWriters.forEach { writer -> 
 		writer.write("hr,hg,hb,sr,sg,sb")
@@ -79,15 +80,18 @@ fun generateCSV() {
 		
 		assert(chunk.size == outputFiles.size)
 		
-		outputWriters.zip(chunk).forEach { (writer, entry) -> 
+		chunk.forEachIndexed { index, entry -> 
 			val strLine = entry.joinToString(separator = ",")
-			writer.write(strLine)
-			writer.newLine()
+			outputWriters[index].write(strLine)
+			outputWriters[index].newLine()
+			lineCounters[index]++
 		}
 		
 	}
 	
 	outputWriters.forEach(BufferedWriter::close)
+	
+	println("Row stats: $lineCounters")
 	
 }
 

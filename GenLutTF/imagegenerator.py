@@ -1,6 +1,6 @@
 from typing import Tuple
 
-import OpenImageIO as oiio
+import cv2
 
 import numpy as np
 from tensorflow.keras.utils import Sequence
@@ -78,13 +78,8 @@ class HDR2SDRImageGenerator(Sequence):
             hdr_filepath, sdr_filepath = self._image_map[image_index]
             
             # load the pixels
-            hdr_img = oiio.ImageInput.open(hdr_filepath)
-            hdr_pix = hdr_img.read_image(format='uint16')[top:y_end, left:x_end].reshape((self.__calc_pixels_per_image(), 3))
-            sdr_img = oiio.ImageInput.open(sdr_filepath)
-            sdr_pix = sdr_img.read_image(format='uint8')[top:y_end, left:x_end].reshape((self.__calc_pixels_per_image(), 3))
-            
-            hdr_img.close()
-            sdr_img.close()
+            hdr_pix = cv2.imread(hdr_filepath, cv2.IMREAD_UNCHANGED)[top:y_end, left:x_end].reshape((self.__calc_pixels_per_image(), 3))
+            sdr_pix = cv2.imread(sdr_filepath, cv2.IMREAD_UNCHANGED)[top:y_end, left:x_end].reshape((self.__calc_pixels_per_image(), 3))
             
             # copy into the buffers
             pixel_start_index = (image_index - image_start_index) * self._pixels_per_image

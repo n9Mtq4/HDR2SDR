@@ -91,7 +91,7 @@ fun generateCSV() {
 	
 	outputWriters.forEach(BufferedWriter::close)
 	
-	println("Row stats: $lineCounters")
+	println("Row stats: ${lineCounters.contentToString()}")
 	
 }
 

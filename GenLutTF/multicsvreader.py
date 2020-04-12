@@ -13,6 +13,7 @@ class MultiCSVReader(Sequence):
         self._x_cols = x_cols
         self._y_cols = y_cols
         
+        assert len(csv_list) == len(csv_sizes)
         self._total_rows = sum(csv_sizes)
         
         self.__reset()

@@ -37,7 +37,7 @@ fun main() {
 	
 //	generatePyImageMap()
 //	generateCSV()
-	genLut()
+	genLut(65)
 	
 }
 
@@ -56,9 +56,9 @@ fun getFileMap(): List<Pair<File, File>> {
 	
 }
 
-fun genLut() {
+fun genLut(size: Int) {
 	
-	val lut = LutGen(33)
+	val lut = LutGen(size)
 	
 	val fileMap = getFileMap()
 	

@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage
 import java.io.BufferedWriter
 import java.io.File
 import javax.imageio.ImageIO
+import kotlin.math.roundToInt
 
 /**
  * Created by will on 3/30/20 at 7:59 AM.
@@ -35,7 +36,8 @@ val Y_RANDOM_RANGE = 0 until Y_SELECTION
 fun main() {
 	
 //	generatePyImageMap()
-	generateCSV()
+//	generateCSV()
+	genLut()
 	
 }
 
@@ -51,6 +53,59 @@ fun getFileMap(): List<Pair<File, File>> {
 		.filterIndexed { i, _ -> i % FRAME_SELECTION == 0 }
 	
 	return fileMap
+	
+}
+
+fun genLut() {
+	
+	val lut = LutGen(33)
+	
+	val fileMap = getFileMap()
+	
+	fileMap
+		.shuffled()
+		.asSequence()
+		.map { (sdrFile, hdrFile) -> ImageIO.read(sdrFile) to ImageIO.read(hdrFile) }
+		.forEachIndexed { index, (sdrImage, hdrImage) ->
+			println("processing ${index + 1}/${fileMap.size}")
+			lutProcessImage(lut, sdrImage, hdrImage)
+		}
+	
+	lut.write("direct_lut.cube")
+	
+}
+
+fun lutProcessImage(lut: LutGen, sdrImage: BufferedImage, hdrImage: BufferedImage) {
+	
+	assert(sdrImage.width == hdrImage.width)
+	assert(sdrImage.height == hdrImage.height)
+	
+	val height = sdrImage.height - Y_BLACK_BAR
+	val width = sdrImage.width - X_BLACK_BAR
+	
+	for (y in Y_BLACK_BAR until height step 1) { // step Y_SELECTION
+		for (x in X_BLACK_BAR until width step 1) { // step X_SELECTION
+			
+			lutProcessPixel(lut, sdrImage, hdrImage, x, y)
+			
+		}
+	}
+	
+}
+
+fun lutProcessPixel(lut: LutGen, sdrImage: BufferedImage, hdrImage: BufferedImage, x: Int, y: Int) {
+	
+	val sdrPixel = sdrImage.raster.getPixel(x, y, IntArray(3))
+	val hdrPixel = hdrImage.raster.getPixel(x, y, IntArray(3))
+	
+	// convert sdr pixel to lut vector
+	val sdrLutVector = sdrPixel.map { it / 255.0 }.toDoubleArray()
+	
+	// convert hdr pixel to nearest neighbor in lut
+	val (lir, lig, lib) = hdrPixel.map { ((it / 65535.0) * lut.size).roundToInt() }
+	
+	// update that index in the lut
+	lut.updateAverage(lir, lig, lib, sdrLutVector)
 	
 }
 

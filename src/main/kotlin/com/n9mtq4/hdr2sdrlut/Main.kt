@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage
 import java.io.BufferedWriter
 import java.io.File
 import javax.imageio.ImageIO
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 /**
@@ -15,20 +16,20 @@ import kotlin.math.roundToInt
 const val HDR_FRAMES_DIR = "/mnt/L4/media/clonewars/Season07/hdrluts/1080hdr"
 const val SDR_FRAMES_DIR = "/mnt/L4/media/clonewars/Season07/hdrluts/1080"
 
-const val CSV_SPLITS = 4
+const val CSV_SPLITS = 1
 
 const val X_BLACK_BAR = 0
 const val Y_BLACK_BAR = 132
 
 const val SDR_START = 2
-const val SDR_END = 30810 + 200
+const val SDR_END = 33245 + 200
 
 const val HDR_START = 74
-const val HDR_END = 30882 + 200
+const val HDR_END = 33317 + 200
 
 const val FRAME_SELECTION = 1
-const val X_SELECTION = 8 / (CSV_SPLITS / 2)
-const val Y_SELECTION = 6 / (CSV_SPLITS / 2)
+val X_SELECTION = 8 / max(1, CSV_SPLITS / 2)
+val Y_SELECTION = 6 / max(1, CSV_SPLITS / 2)
 
 val X_RANDOM_RANGE = 0 until X_SELECTION
 val Y_RANDOM_RANGE = 0 until Y_SELECTION
@@ -37,7 +38,10 @@ fun main() {
 	
 //	generatePyImageMap()
 //	generateCSV()
-	genLut(65)
+//	genLut(65)
+	
+	val lut = genMergedLut(65)
+	lut.write("merge_lut.cube")
 	
 }
 
@@ -56,7 +60,18 @@ fun getFileMap(): List<Pair<File, File>> {
 	
 }
 
-fun genLut(size: Int) {
+fun genMergedLut(size: Int): LutGen {
+	
+	val lut = genLut(size)
+	
+	val tfLut = Lut.load("tf_lut.cube")
+	lut.merge(tfLut)
+	
+	return lut
+	
+}
+
+fun genLut(size: Int): LutGen {
 	
 	val lut = LutGen(size)
 	
@@ -71,7 +86,7 @@ fun genLut(size: Int) {
 			lutProcessImage(lut, sdrImage, hdrImage)
 		}
 	
-	lut.write("direct_lut.cube")
+	return lut
 	
 }
 
@@ -122,7 +137,7 @@ fun generateCSV() {
 			csvProcessImage(sdrImage, hdrImage)
 		}.flatten()
 	
-	val outputFiles = Array(CSV_SPLITS) { i -> File("s07e05_${i + 1}.csv") }
+	val outputFiles = Array(CSV_SPLITS) { i -> File("s07e01_${i + 1}.csv") }
 	val outputWriters = outputFiles.map { it.bufferedWriter() }
 	val lineCounters = Array(CSV_SPLITS) { 0L }
 	

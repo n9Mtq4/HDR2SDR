@@ -32,4 +32,27 @@ class LutGen(size: Int, val maxSamples: Long = 10_000_000L) : Lut(size) {
 		
 	}
 	
+	/**
+	 * Merges another lut into this one. Replaces any pixels
+	 * that weren't sampled in this lut with the values from otherLut
+	 * */
+	fun merge(otherLut: Lut) {
+		
+		assert(this.size == otherLut.size)
+		
+		for (ri in 0 until size) {
+			for (gi in 0 until size) {
+				for (bi in 0 until size) {
+					
+					if (denom[ri][gi][bi] > 0) continue
+					
+					// this pixel was never sampled
+					table[ri][gi][bi] = otherLut.table[ri][gi][bi]
+					
+				}
+			}
+		}
+		
+	}
+	
 }

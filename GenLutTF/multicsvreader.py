@@ -16,9 +16,9 @@ class MultiCSVReader(Sequence):
         assert len(csv_list) == len(csv_sizes)
         self._total_rows = sum(csv_sizes)
         
-        self.__reset()
+        self._reset()
     
-    def __reset(self):
+    def _reset(self):
         self._currently_loaded = -1
         self._prev_index = -1
         self._prev_row_end = 0
@@ -40,7 +40,7 @@ class MultiCSVReader(Sequence):
             self.__load_csv_to_buffer(self._currently_loaded + 1)
     
     def on_epoch_end(self):
-        self.__reset()
+        self._reset()
     
     def __getitem__(self, index):
         """

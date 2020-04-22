@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from tensorflow.keras.utils import Sequence
 
 
@@ -40,7 +41,7 @@ class SingleCSVReader(Sequence):
         row_start = self._batch_size * index
         row_end = min(row_start + self._batch_size, self._total_rows)
         
-        return self._x_buffer[row_start:row_end], self._y_buffer[row_start:row_end]
+        return np.array(self._x_buffer[row_start:row_end]), np.array(self._y_buffer[row_start:row_end])
     
     def __len__(self) -> int:
         """
